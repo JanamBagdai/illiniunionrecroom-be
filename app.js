@@ -1,5 +1,6 @@
 const express = require('express')
 const mysql = require('mysql2')
+const cors = require('cors')
 const app = express()
 const http = require('http')
 const jsonwebtoken = require("jsonwebtoken");
@@ -7,6 +8,7 @@ const JWT_SECRET =
     "goK!pusp6ThEdURUtRenOwUhAsWUCLheBazl!uJLPlS8EbreWLdrupIwabRAsiBu";
 
 const port = 3000
+
 
 // const server = http.createServer(function(req, res){
 //     res.write('Hello Node')
@@ -23,6 +25,14 @@ const port = 3000
 // })
 
 app.use(express.json())
+
+app.use(function(req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+});
 
 const con = mysql.createConnection({
     host: '127.0.0.1',
@@ -113,7 +123,7 @@ app.get('/get-count', (req, res) =>{
     })
 })
 
-app.get('/get-queue',verifyToken, (req, res) =>{
+app.get('/get-queue', (req, res) =>{
 
     con.query('SELECT * FROM userdata ORDER BY dateCreated', (error, result)=>{
         if(error){
