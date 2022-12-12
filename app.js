@@ -82,21 +82,76 @@ app.post('/post-in-queue', (req, res) =>{
     const name = req.body.name;
     const mobile = req.body.mobile;
     const people = req.body.people;
-    const game = req.body.game
-
-    con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)',[dateCreated, name, mobile, people, game], (error, result)=>{
-        if(error){
-            res.status(404).json({
-                message: 'Could not enter user data',
-                data : {}
-            })
-        } else{
-            res.status(201).json({
-                message: 'User data entered successfully',
-                data : {}
+    const bowling = req.body.bowling;
+    const billiards = req.body.billiards;
+    let game = "";
+    console.log(req.body)
+    if(bowling===true && billiards===true){
+        game = "Billiards"
+        con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)',[dateCreated, name, mobile, people, game], (error, result)=>{
+            if(error){
+                res.status(404).json({
+                    message: 'Could not enter user data',
+                    data : {}
+                })
+            } else{
+                res.status(201).json({
+                    message: 'User data entered successfully',
+                    data : {}
+                })
+            }
+        })
+        game = "Bowling"
+        con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)',[dateCreated, name, mobile, people, game], (error, result)=>{
+            if(error){
+                res.status(404).json({
+                    message: 'Could not enter user data',
+                    data : {}
+                })
+            } else{
+                res.status(201).json({
+                    message: 'User data entered successfully',
+                    data : {}
+                })
+            }
+        })
+    }
+    else
+    {
+        if(bowling){
+            game = "Bowling"
+            con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)',[dateCreated, name, mobile, people, game], (error, result)=>{
+                if(error){
+                    res.status(404).json({
+                        message: 'Could not enter user data',
+                        data : {}
+                    })
+                } else{
+                    res.status(201).json({
+                        message: 'User data entered successfully',
+                        data : {}
+                    })
+                }
             })
         }
-    })
+        else
+        {
+            game = "Billiards"
+            con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)',[dateCreated, name, mobile, people, game], (error, result)=>{
+                if(error){
+                    res.status(404).json({
+                        message: 'Could not enter user data',
+                        data : {}
+                    })
+                } else{
+                    res.status(201).json({
+                        message: 'User data entered successfully',
+                        data : {}
+                    })
+                }
+            })
+        }
+    }
 })
 
 
@@ -114,7 +169,7 @@ app.get('/get-count', (req, res) =>{
         } else{
             bowl = result[0]['bowling'];
             billiards = result[0]['billiards'];
-            var data = {"message": "success", "bowling": bowl, "billiards": billiards};
+            var data = { "bowling": bowl, "billiards": billiards};
             res.status(201).json({
                 message: 'Count of people',
                 data : data
@@ -124,20 +179,36 @@ app.get('/get-count', (req, res) =>{
 })
 
 app.get('/get-queue', (req, res) =>{
+    let game = req.query.game
+    if(!game){
+        con.query('SELECT * FROM userdata ORDER BY dateCreated', (error, result)=>{
+            if(error){
+                console.log('Something went wrong ' + error)
+            } else{
+                var data = result;
+                res.status(201).json({
+                    message: 'Success',
+                    data : data
+                })
+            }
+        })
+    }
+    else
+    {
+        con.query('SELECT * FROM userdata where game =? ORDER BY dateCreated',[game], (error, result)=>{
+            if(error){
+                console.log('Something went wrong ' + error)
+            } else{
+                var data = result;
+                res.status(201).json({
+                    message: 'Success',
+                    data : data
+                })
+            }
+        })
+    }
 
-    con.query('SELECT * FROM userdata ORDER BY dateCreated', (error, result)=>{
-        if(error){
-            console.log('Something went wrong ' + error)
-        } else{
-            var data = result;
-            res.status(201).json({
-                message: 'Success',
-                data : data
-            })
-        }
-    })
 })
-
 
 app.delete('/remove-queue/:id', (req, res) =>{
 
@@ -214,11 +285,11 @@ app.post('/register', (req, res) =>{
 
 })
 
-app.get('/login', (req, res) => {
+app.post('/login', (req, res) => {
     const { username, password } = req.body;
     console.log(`${username} is trying to login ..`);
 
-    if (username === "admin" && password === "admin") {
+    if (username === "admin@gmail.com" && password === "admin") {
         return res.json({
             token: jsonwebtoken.sign({ user: "admin" }, JWT_SECRET, { expiresIn: 86400})
         });
