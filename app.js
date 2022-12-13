@@ -67,7 +67,7 @@ const verifyToken = (req, res, next) => {
 };
 
 
-app.listen(3000, (error) => {
+app.listen(process.env.PORT || 3000, (error) => {
     if (error) {
         console.log(error)
     } else {
