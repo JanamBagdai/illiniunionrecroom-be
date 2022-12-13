@@ -91,7 +91,7 @@ app.post('/post-in-queue', (req, res) => {
             if (error) {
                 res.status(404).json({
                     message: 'Could not enter user data',
-                    data: {}
+                    data: {"error":error}
                 }).send()
             }
         })
@@ -100,7 +100,7 @@ app.post('/post-in-queue', (req, res) => {
             if (error) {
                 res.status(404).json({
                     message: 'Could not enter user data',
-                    data: {}
+                    data: {"error":error}
                 }).send()
             }
         })
@@ -153,7 +153,7 @@ app.get('/get-count', (req, res) => {
         if (error) {
             res.status(500).json({
                 message: 'Server Error.',
-                data: {}
+                data: {"error": error}
             })
         } else {
             bowl = result[0]['bowling'];
@@ -227,7 +227,7 @@ app.delete('/remove-queue/:id', verifyToken,(req, res) => {
             console.log('Something went wrong ' + error)
             res.status(404).json({
                 message: 'Token ID Not Found',
-                data: null
+                data: {"error":error}
             })
 
         } else {
@@ -280,7 +280,7 @@ app.post('/register', (req, res) => {
         if (error) {
             res.status(404).json({
                 message: 'Admin registeration failed',
-                data: error
+                data: {"error":error}
             })
         } else {
             res.status(201).json({
