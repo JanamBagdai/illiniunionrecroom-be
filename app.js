@@ -86,74 +86,70 @@ app.post('/post-in-queue', (req, res) => {
     const billiards = req.body.billiards;
     let game = "";
     console.log(req.body)
-    
+    con = connectionRequest()
     if (bowling === true && billiards === true) {
         game = "Billiards"
-        con = connectionRequest()
         con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
             if (error) {
                 res.status(404).json({
                     message: 'Could not enter user data',
                     data: {"error": error}
                 }).send()
-                con.destroy()
             }
         })
         game = "Bowling"
-        con = connectionRequest()
         con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
             if (error) {
                 res.status(404).json({
                     message: 'Could not enter user data',
                     data: {"error": error}
                 }).send()
-                con.destroy()
             }
         })
         res.status(201).json({
             message: 'User data entered successfully',
             data: {}
-        })
-        con.destroy()
+        }).send()
     } else {
         if (bowling) {
             game = "Bowling"
-            con = connectionRequest()
             con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
                 if (error) {
                     res.status(404).json({
                         message: 'Could not enter user data',
                         data: {}
-                    })
-                    con.destroy()
+                    }).send()
                 } else {
                     res.status(201).json({
                         message: 'User data entered successfully',
                         data: {}
-                    })
-                    con.destroy()
-                }
-            })
-        } else {
-            game = "Billiards"
-            con = connectionRequest()
-            con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
-                if (error) {
-                    res.status(404).json({
-                        message: 'Could not enter user data',
-                        data: {}
-                    })
-                    con.destroy()
-                } else {
-                    res.status(201).json({
-                        message: 'User data entered successfully',
-                        data: {}
-                    })
-                    con.destroy()
+                    }).send()
                 }
             })
         }
+        if(billiards) {
+            game = "Billiards"
+            con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
+                if (error) {
+                    res.status(404).json({
+                        message: 'Could not enter user data',
+                        data: {}
+                    }).send()
+                } else {
+                    res.status(201).json({
+                        message: 'User data entered successfully',
+                        data: {}
+                    }).send()
+
+                }
+            })
+        }
+
     }
+
+
+
+    con.destroy()
 })
 
 
@@ -170,8 +166,8 @@ app.get('/get-count', (req, res) => {
             })
             con.destroy()
         } else {
-            bowl = result[0]['bowling'];
-            billiards = result[0]['billiards'];
+            bowl = result[0]['bowling']?result[0]['bowling']:0;
+            billiards = result[0]['billiards']?result[0]['billiards']:0;
             var data = {"bowling": bowl, "billiards": billiards};
             res.status(201).json({
                 message: 'Count of people',
@@ -329,7 +325,7 @@ app.post('/login', (req, res) => {
 
                 con.destroy()
                 return res.status(201).json({
-                    message: 'Admin registered successfully',
+                    message: 'Admin logged in successfully',
                     data: {
                         token: jsonwebtoken.sign({user: "admin"}, JWT_SECRET, {expiresIn: 86400})
                     }
