@@ -1,5 +1,6 @@
 const express = require('express')
 const mysql = require('mysql2')
+require('dotenv').config();
 const cors = require('cors')
 const app = express()
 const http = require('http')
@@ -29,8 +30,7 @@ app.use(express.json())
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Access-Control-Allow-Headers', 'Authorization');
+    res.setHeader('Access-Control-Allow-Headers', '*');
     res.setHeader('Access-Control-Allow-Credentials', true);
     next();
 });
@@ -91,12 +91,7 @@ app.post('/post-in-queue', (req, res) => {
                 res.status(404).json({
                     message: 'Could not enter user data',
                     data: {}
-                })
-            } else {
-                res.status(201).json({
-                    message: 'User data entered successfully',
-                    data: {}
-                })
+                }).send()
             }
         })
         game = "Bowling"
@@ -105,14 +100,13 @@ app.post('/post-in-queue', (req, res) => {
                 res.status(404).json({
                     message: 'Could not enter user data',
                     data: {}
-                })
-            } else {
-                res.status(201).json({
-                    message: 'User data entered successfully',
-                    data: {}
-                })
+                }).send()
             }
         })
+            res.status(201).json({
+                message: 'User data entered successfully',
+                data: {}
+            })
     } else {
         if (bowling) {
             game = "Bowling"
@@ -310,4 +304,29 @@ app.post('/login', (req, res) => {
         .status(401)
         .json({message: "The username and password your provided are invalid"});
 })
+
+
+
+app.get('/switch-website', (req, res) => {
+    if(process.env.WEB_ON==="true"){
+        process.env.WEB_ON = "false"
+    }
+    else
+    {
+        process.env.WEB_ON = "true"
+    }
+    res.status(200).json({
+        message: 'Toggling website',
+        data: process.env.WEB_ON
+    })
+})
+
+app.get('/get-switch-website-details', (req, res) => {
+
+    res.status(200).json({
+        message: 'Success',
+        data: process.env.WEB_ON
+    })
+})
+
 
