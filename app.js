@@ -91,7 +91,7 @@ app.post('/post-in-queue', (req, res) => {
             if (error) {
                 res.status(404).json({
                     message: 'Could not enter user data',
-                    data: {"error":error}
+                    data: {"error": error}
                 }).send()
             }
         })
@@ -100,14 +100,14 @@ app.post('/post-in-queue', (req, res) => {
             if (error) {
                 res.status(404).json({
                     message: 'Could not enter user data',
-                    data: {"error":error}
+                    data: {"error": error}
                 }).send()
             }
         })
-            res.status(201).json({
-                message: 'User data entered successfully',
-                data: {}
-            })
+        res.status(201).json({
+            message: 'User data entered successfully',
+            data: {}
+        })
     } else {
         if (bowling) {
             game = "Bowling"
@@ -179,12 +179,11 @@ app.get('/get-queue', (req, res) => {
                 var data = result;
 
                 for (i = 0; i < result.length; i++) {
-                    if(result[i].game==='Bowling'){
-                        countbowling+=1;
+                    if (result[i].game === 'Bowling') {
+                        countbowling += 1;
                         result[i].turn = countbowling
-                    }
-                    else{
-                        countbilliards+=1;
+                    } else {
+                        countbilliards += 1;
                         result[i].turn = countbilliards
                     }
                 }
@@ -217,7 +216,7 @@ app.get('/get-queue', (req, res) => {
     }
 });
 
-app.delete('/remove-queue/:id', verifyToken,(req, res) => {
+app.delete('/remove-queue/:id', verifyToken, (req, res) => {
 
     var token = req.params.id;
     console.log(token)
@@ -227,7 +226,7 @@ app.delete('/remove-queue/:id', verifyToken,(req, res) => {
             console.log('Something went wrong ' + error)
             res.status(404).json({
                 message: 'Token ID Not Found',
-                data: {"error":error}
+                data: {"error": error}
             })
 
         } else {
@@ -266,54 +265,64 @@ app.delete('/remove-queue/:id', verifyToken,(req, res) => {
 
 var key = "pwd@1234"
 
-app.post('/register', (req, res) => {
-
-    var username = req.body.name;
-    var password = req.body.password;
-    console.log(password);
-    // Encrypting the data using the password key
-    var encrypted_name = crypto.AES.encrypt(username, key).toString();
-    var encrypted_password = crypto.AES.encrypt(password, key).toString();
-    console.log(encrypted_password)
-
-    con.query('insert into admindata(name, password) values(?, ?)', [encrypted_name, encrypted_password], (error, result) => {
-        if (error) {
-            res.status(404).json({
-                message: 'Admin registeration failed',
-                data: {"error":error}
-            })
-        } else {
-            res.status(201).json({
-                message: 'Admin registered successfully',
-                data: {}
-            })
-        }
-    })
-
-})
+// app.post('/register', (req, res) => {
+//
+//     var username = req.body.name;
+//     var password = req.body.password;
+//     console.log(password);
+//     // Encrypting the data using the password key
+//     var encrypted_name = crypto.AES.encrypt(username, key).toString();
+//     var encrypted_password = crypto.AES.encrypt(password, key).toString();
+//     console.log(encrypted_password)
+//
+//     con.query('insert into admindata(name, password) values(?, ?)', [encrypted_name, encrypted_password], (error, result) => {
+//         if (error) {
+//             res.status(404).json({
+//                 message: 'Admin registeration failed',
+//                 data: {"error": error}
+//             })
+//         } else {
+//             res.status(201).json({
+//                 message: 'Admin registered successfully',
+//                 data: {}
+//             })
+//         }
+//     })
+//
+// })
 
 app.post('/login', (req, res) => {
     const {username, password} = req.body;
     console.log(`${username} is trying to login ..`);
-
-    if (username === "admin@gmail.com" && password === "admin") {
-        return res.json({
-            token: jsonwebtoken.sign({user: "admin"}, JWT_SECRET, {expiresIn: 86400})
-        });
-    }
-    return res
-        .status(401)
-        .json({message: "The username and password your provided are invalid"});
+    con.query('Select name, password from admindata where name = ? and password = ?', [username, password], (error, result) => {
+        if (error) {
+            res.status(404).json({
+                message: 'Admin registration failed',
+                data: {"error": error}
+            })
+        } else {
+            if (result.length === 1) {
+                return res.status(201).json({
+                    message: 'Admin registered successfully',
+                    data: {
+                        token: jsonwebtoken.sign({user: "admin"}, JWT_SECRET, {expiresIn: 86400})
+                    }
+                })
+            } else {
+                return res.status(201).json({
+                    message: "The username and password your provided are invalid",
+                    data: "error"
+                });
+            }
+        }
+    })
 })
 
 
-
 app.get('/switch-website', (req, res) => {
-    if(process.env.WEB_ON==="true"){
+    if (process.env.WEB_ON === "true") {
         process.env.WEB_ON = "false"
-    }
-    else
-    {
+    } else {
         process.env.WEB_ON = "true"
     }
     res.status(200).json({
