@@ -86,7 +86,7 @@ app.post('/post-in-queue', (req, res) => {
     const billiards = req.body.billiards;
     let game = "";
     console.log(req.body)
-    con = connectionRequest()
+    let con = connectionRequest()
     if (bowling === true && billiards === true) {
         game = "Billiards"
         con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
@@ -119,11 +119,13 @@ app.post('/post-in-queue', (req, res) => {
                         message: 'Could not enter user data',
                         data: {}
                     }).send()
+                    con.destroy()
                 } else {
                     res.status(201).json({
                         message: 'User data entered successfully',
                         data: {}
                     }).send()
+                    con.destroy()
                 }
             })
         }
@@ -135,20 +137,17 @@ app.post('/post-in-queue', (req, res) => {
                         message: 'Could not enter user data',
                         data: {}
                     }).send()
+                    con.destroy()
                 } else {
                     res.status(201).json({
                         message: 'User data entered successfully',
                         data: {}
                     }).send()
-
+                    con.destroy()
                 }
             })
         }
     }
-
-
-
-    con.destroy()
 })
 
 
