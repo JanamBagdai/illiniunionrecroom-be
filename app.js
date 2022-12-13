@@ -10,6 +10,7 @@ const JWT_SECRET =
 
 const port = 3000
 
+const connectionRequest = require('./connect.js')
 
 // const server = http.createServer(function(req, res){
 //     res.write('Hello Node')
@@ -35,22 +36,22 @@ app.use(function (req, res, next) {
     next();
 });
 
-const con = mysql.createConnection({
-    host: 'us-cdbr-east-06.cleardb.net',
-    user: 'beffb000664367',
-    password: 'cbb7b74a',
-    database: 'heroku_443f99716ce7801'
-})
+// const con = mysql.createConnection({
+//     host: 'us-cdbr-east-06.cleardb.net',
+//     user: 'beffb000664367',
+//     password: 'cbb7b74a',
+//     database: 'heroku_443f99716ce7801'
+// })
 
 //mysql://beffb000664367:cbb7b74a@us-cdbr-east-06.cleardb.net/heroku_443f99716ce7801?reconnect=true
 
-con.connect((err) => {
-    if (err) {
-        console.log(err)
-    } else {
-        console.log("Database connection established")
-    }
-})
+// con.connect((err) => {
+//     if (err) {
+//         console.log(err)
+//     } else {
+//         console.log("Database connection established")
+//     }
+// })
 
 
 const verifyToken = (req, res, next) => {
@@ -85,58 +86,70 @@ app.post('/post-in-queue', (req, res) => {
     const billiards = req.body.billiards;
     let game = "";
     console.log(req.body)
+    
     if (bowling === true && billiards === true) {
         game = "Billiards"
+        con = connectionRequest()
         con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
             if (error) {
                 res.status(404).json({
                     message: 'Could not enter user data',
                     data: {"error": error}
                 }).send()
+                con.destroy()
             }
         })
         game = "Bowling"
+        con = connectionRequest()
         con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
             if (error) {
                 res.status(404).json({
                     message: 'Could not enter user data',
                     data: {"error": error}
                 }).send()
+                con.destroy()
             }
         })
         res.status(201).json({
             message: 'User data entered successfully',
             data: {}
         })
+        con.destroy()
     } else {
         if (bowling) {
             game = "Bowling"
+            con = connectionRequest()
             con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
                 if (error) {
                     res.status(404).json({
                         message: 'Could not enter user data',
                         data: {}
                     })
+                    con.destroy()
                 } else {
                     res.status(201).json({
                         message: 'User data entered successfully',
                         data: {}
                     })
+                    con.destroy()
                 }
             })
         } else {
             game = "Billiards"
+            con = connectionRequest()
             con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
                 if (error) {
                     res.status(404).json({
                         message: 'Could not enter user data',
                         data: {}
                     })
+                    con.destroy()
                 } else {
                     res.status(201).json({
                         message: 'User data entered successfully',
                         data: {}
                     })
+                    con.destroy()
                 }
             })
         }
@@ -148,13 +161,14 @@ app.get('/get-count', (req, res) => {
 
     var bowl = 0;
     var billiards = 0;
-
+    con = connectionRequest()
     con.query('SELECT SUM(IF(game = "Bowling", 1, 0)) AS bowling, SUM(IF(game = "Billiards", 1, 0)) AS billiards FROM userdata', (error, result) => {
         if (error) {
             res.status(500).json({
                 message: 'Server Error.',
                 data: {"error": error}
             })
+            con.destroy()
         } else {
             bowl = result[0]['bowling'];
             billiards = result[0]['billiards'];
@@ -163,13 +177,17 @@ app.get('/get-count', (req, res) => {
                 message: 'Count of people',
                 data: data
             })
+            con.destroy()
         }
     })
 })
+
+
 app.get('/get-queue', (req, res) => {
     let game = req.query.game
 
     if (!game) {
+        con = connectionRequest()
         let countbilliards = 0
         let countbowling = 0
         con.query('SELECT * FROM userdata ORDER BY dateCreated', (error, result) => {
@@ -192,10 +210,11 @@ app.get('/get-queue', (req, res) => {
                     message: 'Success',
                     data: data
                 })
+                con.destroy()
             }
         })
     } else {
-
+        con = connectionRequest()
         con.query('SELECT * FROM userdata where game =? ORDER BY dateCreated', [game], (error, result) => {
             var count = 0;
             var i = 0;
@@ -211,6 +230,7 @@ app.get('/get-queue', (req, res) => {
                     message: 'Success',
                     data: data
                 })
+                con.destroy()
             }
         })
     }
@@ -220,7 +240,7 @@ app.delete('/remove-queue/:id', verifyToken, (req, res) => {
 
     var token = req.params.id;
     console.log(token)
-
+    con = connectionRequest()
     con.query('DELETE FROM userdata WHERE token_id = ?', [token], (error, result) => {
         if (error) {
             console.log('Something went wrong ' + error)
@@ -228,6 +248,7 @@ app.delete('/remove-queue/:id', verifyToken, (req, res) => {
                 message: 'Token ID Not Found',
                 data: {"error": error}
             })
+            con.destroy()
 
         } else {
             var data = {"message": "success"};
@@ -235,6 +256,7 @@ app.delete('/remove-queue/:id', verifyToken, (req, res) => {
                 message: 'Token data is deleted successfully and removed from the queue',
                 data: data
             });
+            con.destroy()
         }
     })
 
@@ -294,14 +316,18 @@ var key = "pwd@1234"
 app.post('/login', (req, res) => {
     const {username, password} = req.body;
     console.log(`${username} is trying to login ..`);
+    con = connectionRequest()
     con.query('Select name, password from admindata where name = ? and password = ?', [username, password], (error, result) => {
         if (error) {
             res.status(404).json({
                 message: 'Admin registration failed',
                 data: {"error": error}
             })
+            con.destroy()
         } else {
             if (result.length === 1) {
+
+                con.destroy()
                 return res.status(201).json({
                     message: 'Admin registered successfully',
                     data: {
@@ -309,10 +335,13 @@ app.post('/login', (req, res) => {
                     }
                 })
             } else {
+
+                con.destroy()
                 return res.status(201).json({
                     message: "The username and password your provided are invalid",
                     data: "error"
                 });
+               // con.destroy()
             }
         }
     })
