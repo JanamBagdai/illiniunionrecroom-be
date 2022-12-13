@@ -36,12 +36,13 @@ app.use(function (req, res, next) {
 });
 
 const con = mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'root',
-    password: 'janamjanam',
-    database: 'userdata'
+    host: 'us-cdbr-east-06.cleardb.net',
+    user: 'beffb000664367',
+    password: 'cbb7b74a',
+    database: 'heroku_443f99716ce7801'
 })
 
+//mysql://beffb000664367:cbb7b74a@us-cdbr-east-06.cleardb.net/heroku_443f99716ce7801?reconnect=true
 
 con.connect((err) => {
     if (err) {
