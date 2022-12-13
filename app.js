@@ -127,7 +127,7 @@ app.post('/post-in-queue', (req, res) => {
                 }
             })
         }
-        if(billiards) {
+        else {
             game = "Billiards"
             con.query('insert into userdata(dateCreated, name, mobile, people, game) values(?, ?, ?, ?, ?)', [dateCreated, name, mobile, people, game], (error, result) => {
                 if (error) {
@@ -144,7 +144,6 @@ app.post('/post-in-queue', (req, res) => {
                 }
             })
         }
-
     }
 
 
